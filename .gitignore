@@ -1,0 +1,35 @@
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# Debug
+*.pdb
+*.cache
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+secrets.json

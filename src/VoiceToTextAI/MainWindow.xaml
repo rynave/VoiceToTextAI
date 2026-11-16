@@ -1,0 +1,144 @@
+<Window x:Class="VoiceToTextAI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Voice to Text AI" Height="900" Width="860" MinHeight="760" MinWidth="680"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgBrush}" Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI" FontSize="14"
+        AllowDrop="True" DragOver="Window_DragOver" Drop="Window_Drop">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+    </Window.Resources>
+
+    <Grid Margin="28,22,28,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Voice to Text AI" FontSize="28" FontWeight="Bold"/>
+            <TextBlock Text="Convert audio files to text with Google Gemini" Style="{StaticResource MutedText}"
+                       FontSize="13" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,20,0,0" IsEnabled="{Binding IsNotBusy}">
+            <TextBlock Text="Google AI Studio API key" Style="{StaticResource FieldLabel}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <PasswordBox x:Name="ApiKeyBox"/>
+                    <TextBox x:Name="ApiKeyText" Visibility="Collapsed"/>
+                </Grid>
+                <ToggleButton x:Name="ShowKeyToggle" Grid.Column="1" Content="Show" Margin="8,0,0,0"
+                              Style="{StaticResource SecondaryToggle}"/>
+            </Grid>
+            <TextBlock Text="The key is kept in memory only and is never saved to disk."
+                       Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,16,0,0" IsEnabled="{Binding IsNotBusy}">
+            <TextBlock Text="Audio file" Style="{StaticResource FieldLabel}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="Browse…" Command="{Binding BrowseCommand}" Style="{StaticResource SecondaryButton}"/>
+                <Border Grid.Column="1" Margin="8,0,0,0" Background="White" BorderBrush="{StaticResource BorderLight}"
+                        BorderThickness="1" Padding="10,8">
+                    <TextBlock Text="{Binding FileDisplay}" TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Margin="0,16,0,0" Orientation="Horizontal" IsEnabled="{Binding IsNotBusy}">
+            <TextBlock Text="Mode:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0"/>
+            <RadioButton GroupName="Mode" Content="Smart" IsChecked="{Binding IsSmart}" Margin="0,0,20,0"
+                         VerticalAlignment="Center"
+                         ToolTip="Clean, readable text: removes fillers and stutters, formats numbers and lists."/>
+            <RadioButton GroupName="Mode" Content="Verbatim" IsChecked="{Binding IsVerbatim}"
+                         VerticalAlignment="Center"
+                         ToolTip="Exact word-for-word transcript, keeping repetitions and fillers."/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Margin="0,18,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Start transcription" Command="{Binding StartCommand}"
+                        Style="{StaticResource PrimaryButton}"/>
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="8,0,0,0"
+                        Style="{StaticResource SecondaryButton}"
+                        Visibility="{Binding IsBusy, Converter={StaticResource B2V}}"/>
+            </StackPanel>
+            <ProgressBar IsIndeterminate="True" Height="4" Margin="0,12,0,0"
+                         Visibility="{Binding IsBusy, Converter={StaticResource B2V}}"/>
+            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="0,10,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+
+        <Grid Grid.Row="5" Margin="0,14,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Margin="0,0,0,6">
+                <TextBlock Text="Transcript" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Button Content="⇄ Text direction" Command="{Binding ToggleDirectionCommand}"
+                        HorizontalAlignment="Right" Padding="10,4" FontSize="12"
+                        Style="{StaticResource SecondaryButton}"/>
+            </Grid>
+            <TextBox Grid.Row="1" Text="{Binding ResultText, UpdateSourceTrigger=PropertyChanged}"
+                     FlowDirection="{Binding ResultFlow}" AcceptsReturn="True" TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                     FontSize="15" Padding="12"/>
+        </Grid>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,12,0,0">
+            <Button Content="Copy Text" Command="{Binding CopyCommand}" Style="{StaticResource SecondaryButton}"/>
+            <Button Content="Save as TXT" Command="{Binding SaveCommand}" Margin="8,0,0,0"
+                    Style="{StaticResource SecondaryButton}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="7" Text="{Binding ProxyInfo}" Style="{StaticResource MutedText}" Margin="0,10,0,0"/>
+
+        <Expander Grid.Row="8" Header="Logs" IsExpanded="True" Margin="0,8,0,0">
+            <Grid Margin="0,8,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="170"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBox x:Name="LogBox" Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True"
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Top" FontFamily="Consolas" FontSize="12" Padding="8"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,6,0,0">
+                    <Button Content="Copy log" Command="{Binding CopyLogCommand}" Padding="12,4" FontSize="12"
+                            Style="{StaticResource SecondaryButton}"/>
+                    <Button Content="Clear log" Command="{Binding ClearLogCommand}" Padding="12,4" FontSize="12"
+                            Margin="8,0,0,0" Style="{StaticResource SecondaryButton}"/>
+                </StackPanel>
+            </Grid>
+        </Expander>
+    </Grid>
+</Window>
